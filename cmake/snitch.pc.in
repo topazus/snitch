@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: @PROJECT_NAME@
+Description: Lightweight C++20 testing framework
+URL: https://github.com/snitch-org/snitch
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lsnitch
+Cflags: -I${includedir}

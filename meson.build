@@ -92,11 +92,14 @@ subdir('snitch')
 
 install_headers(headers, subdir: 'snitch')
 
-if get_option('create_library')
+version = meson.project_version()
 
+if get_option('create_library')
   snitch = library('snitch',
     conf_file, main, headers,
     include_directories: include_dirs,
+    version : version,
+    soversion: version.split('.')[0],
     install: true,
   )
 
@@ -111,11 +114,64 @@ if get_option('create_library')
     description: 'Lightweight C++20 testing framework.',
     url: 'https://github.com/cschreib/snitch',
   )
+  cmake = import('cmake')
+  if meson.version().version_compare('>=0.62.0')
+    cmake.write_basic_package_version_file(
+      name: meson.project_name(),
+      version: meson.project_version(),
+      arch_independent: true,
+      compatibility: 'SameMajorVersion'
+    )
+  else
+    cmake.write_basic_package_version_file(
+      name: meson.project_name(),
+      version: meson.project_version(),
+      compatibility: 'SameMajorVersion'
+    )
+  endif
 
+  conf = configuration_data()
+  cmake.configure_package_config_file(
+    name: meson.project_name(),
+    input: 'cmake/snitch-config.cmake.in',
+    configuration: conf
+  )
 else
-
   snitch_dep = declare_dependency(include_directories: include_dirs)
 
+  import('pkgconfig').generate(
+    snitch,
+    filebase: 'snitch',
+    description: 'Lightweight C++20 testing framework.',
+    url: 'https://github.com/snitch-org/snitch',
+    install_dir: join_paths(get_option('datadir'), 'pkgconfig')
+  )
+
+  cmake = import('cmake')
+  if meson.version().version_compare('>=0.62.0')
+    cmake.write_basic_package_version_file(
+      name: meson.project_name(),
+      version: meson.project_version(),
+      arch_independent: true,
+      compatibility: 'SameMajorVersion',
+      install_dir: join_paths(get_option('datadir'), 'cmake', meson.project_name()),
+    )
+  else
+    cmake.write_basic_package_version_file(
+      name: meson.project_name(),
+      version: meson.project_version(),
+      compatibility: 'SameMajorVersion',
+      install_dir: join_paths(get_option('datadir'), 'cmake', meson.project_name()),
+    )
+  endif
+
+  conf = configuration_data()
+  cmake.configure_package_config_file(
+    name: meson.project_name(),
+    input: 'cmake/snitch-config.cmake.in',
+    configuration: conf,
+    install_dir: join_paths(get_option('datadir'), 'cmake', meson.project_name()),
+  )
 endif
 
 if meson.version().version_compare('>=0.54.0')
